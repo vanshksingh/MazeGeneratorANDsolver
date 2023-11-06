@@ -13,33 +13,35 @@ public class Maze extends JPanel implements Runnable {
         window.setVisible(true);
     }
 
-    int[][] maze;
-    final static int backgroundCode = 0;
+    // Author: vanshksingh
+    int[][] maze;  // Represents the maze grid
+    final static int backgroundCode = 0;  // Codes for different cell types
     final static int wallCode = 1;
     final static int pathCode = 2;
     final static int emptyCode = 3;
     final static int visitedCode = 4;
-    Color[] colors;
-    int rows = 41;
-    int columns = 51;
-    int border = 0;
-    int sleepTime = 5000;
-    int speedSleep = 30;
-    int blockSize = 12;
-    int width = -1;
-    int height = -1;
-    int totalWidth;
-    int totalHeight;
-    int left;
-    int top;
-    boolean mazeExists = false;
-    boolean solving = false;
+    Color[] colors;  // Array of colors for maze elements
+    int rows = 41;  // Number of rows in the maze
+    int columns = 51;  // Number of columns in the maze
+    int border = 0;  // Border width
+    int sleepTime = 5000;  // Sleep time after solving
+    int speedSleep = 30;  // Sleep time during solving
+    int blockSize = 12;  // Size of each cell
+    int width = -1;  // Width of the maze panel
+    int height = -1;  // Height of the maze panel
+    int totalWidth;  // Total width of the maze grid
+    int totalHeight;  // Total height of the maze grid
+    int left;  // Left offset for drawing the maze
+    int top;  // Top offset for drawing the maze
+    boolean mazeExists = false;  // Indicates if the maze has been generated
+    boolean solving = false;  // Indicates if the maze is currently being solved
 
+    // Constructor
     public Maze() {
-        colors = generateMazeColors();
+        colors = generateMazeColors();  // Generate maze colors
         setBackground(colors[backgroundCode]);
         setPreferredSize(new Dimension(blockSize * columns, blockSize * rows));
-        new Thread(this).start();
+        new Thread(this).start();  // Start the maze solving thread
     }
 
     // Helper method to generate luxurious colors with correct contrast
