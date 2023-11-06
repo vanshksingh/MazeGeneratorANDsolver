@@ -62,6 +62,46 @@ public class MazeGeneratorSolver {
         }
     }
 
+    public void solveMaze() {
+        boolean[][] visited = new boolean[rows][cols];
+        Stack<Point> stack = new Stack<>();
+        Point start = new Point(1, 1);
+        Point end = new Point(cols - 2, rows - 2);
+
+        stack.push(start);
+
+        while (!stack.isEmpty()) {
+            Point current = stack.peek();
+            int x = current.x;
+            int y = current.y;
+            visited[y][x] = true;
+
+            if (current.equals(end)) {
+                return; // Maze solved
+            }
+
+            int[] dx = {1, 0, -1, 0};
+            int[] dy = {0, 1, 0, -1};
+
+            boolean found = false;
+
+            for (int i = 0; i < 4; i++) {
+                int nextX = x + dx[i];
+                int nextY = y + dy[i];
+
+                if (nextX >= 0 && nextX < cols && nextY >= 0 && nextY < rows && !visited[nextY][nextX] && maze[nextY][nextX] == PATH) {
+                    stack.push(new Point(nextX, nextY));
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                stack.pop(); // Backtrack
+            }
+        }
+    }
+
     public void printMaze() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -79,5 +119,29 @@ public class MazeGeneratorSolver {
         MazeGeneratorSolver mazeGenerator = new MazeGeneratorSolver(21, 21);
         mazeGenerator.generateMaze();
         mazeGenerator.printMaze();
+        mazeGenerator.solveMaze();
+        mazeGenerator.printMaze();
+    }
+}
+
+class Point {
+    int x, y;
+
+    Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Point point = (Point) obj;
+        return x == point.x && y == point.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
     }
 }
