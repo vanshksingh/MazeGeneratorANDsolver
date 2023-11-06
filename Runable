@@ -3,7 +3,7 @@ import javax.swing.*;
 import java.util.Random;
 
 public class Maze extends JPanel implements Runnable {
-
+//author vanshksingh
     public static void main(String[] args) {
         JFrame window = new JFrame("Maze Solver");
         window.setContentPane(new Maze());
@@ -13,14 +13,14 @@ public class Maze extends JPanel implements Runnable {
         window.setVisible(true);
     }
 
-    // Author: vanshksingh
-    int[][] maze;  // Represents the maze grid
-    final static int backgroundCode = 0;  // Codes for different cell types
-    final static int wallCode = 1;
-    final static int pathCode = 2;
-    final static int emptyCode = 3;
-    final static int visitedCode = 4;
-    Color[] colors;  // Array of colors for maze elements
+    // Define the maze grid and cell types
+    int[][] maze;
+    final static int BACKGROUND = 0;
+    final static int WALL = 1;
+    final static int PATH = 2;
+    final static int EMPTY = 3;
+    final static int VISITED = 4;
+    Color[] colors;  // Colors for maze elements
     int rows = 41;  // Number of rows in the maze
     int columns = 51;  // Number of columns in the maze
     int border = 0;  // Border width
@@ -36,17 +36,17 @@ public class Maze extends JPanel implements Runnable {
     boolean mazeExists = false;  // Indicates if the maze has been generated
     boolean solving = false;  // Indicates if the maze is currently being solved
 
-    // Constructor
+    // Constructor for the Maze class
     public Maze() {
         colors = generateMazeColors();  // Generate maze colors
-        setBackground(colors[backgroundCode]);
+        setBackground(colors[BACKGROUND]);
         setPreferredSize(new Dimension(blockSize * columns, blockSize * rows));
         new Thread(this).start();  // Start the maze solving thread
     }
 
-    // Helper method to generate luxurious colors with correct contrast
-    // Helper method to generate luxurious colors with contrast
+    // Generate a palette of colors for the maze
     Color[] generateMazeColors() {
+        // Define color palettes for the maze (add more palettes if needed)
         Color[][] colorPalettes = new Color[][] {
                 {
                         // Background Color (Dark)
@@ -56,58 +56,10 @@ public class Maze extends JPanel implements Runnable {
                         // Empty Space Color (Dark)
                         new Color(0x222222),
                         // Path Color (Inverse of Wall)
-                        new Color(0xF3A963),  // Inverse of white (black)
+                        new Color(0xF3A963),
                         // Visited Path Color (Darker version of Path)
-                        new Color(0xDC6606)  // A slightly darker shade of black
+                        new Color(0xDC6606)
                 },
-                {
-                        // Background Color (Dark Gray)
-                        new Color(0x444444),
-                        // Wall Color (Light Gray)
-                        new Color(0xDDDDDD),
-                        // Empty Space Color (Dark Gray)
-                        new Color(0x444444),
-                        // Path Color (Inverse of Wall)
-                        new Color(0x06A6A6),  // A darker shade of gray
-                        // Visited Path Color (Darker version of Path)
-                        new Color(0x056565)  // A slightly darker shade of gray
-                },
-                {
-                        // Background Color (Navy Blue)
-                        new Color(0x000080),
-                        // Wall Color (Light Blue)
-                        new Color(0x87CEEB),
-                        // Empty Space Color (Navy Blue)
-                        new Color(0x000080),
-                        // Path Color (Inverse of Wall)
-                        new Color(0x53EA8C),  // A darker shade of blue
-                        // Visited Path Color (Darker version of Path)
-                        new Color(0x308650)  // A slightly darker shade of blue
-                },
-                {
-                        // Background Color (Dark Green)
-                        new Color(0x28324A),
-                        // Wall Color (Light Green)
-                        new Color(0xF0D543),
-                        // Empty Space Color (Dark Green)
-                        new Color(0x28324A),
-                        // Path Color (Inverse of Wall)
-                        new Color(0xEC4F57),  // A darker shade of green
-                        // Visited Path Color (Darker version of Path)
-                        new Color(0x8C3033)  // A slightly darker shade of green
-                },
-                {
-                        // Background Color (Dark Red)
-                        new Color(0xF33D9F),
-                        // Wall Color (Light Red)
-                        new Color(0xACE964),
-                        // Empty Space Color (Dark Red)
-                        new Color(0xF33D9F),
-                        // Path Color (Inverse of Wall)
-                        new Color(0x039DC6),  // A darker shade of red
-                        // Visited Path Color (Darker version of Path)
-                        new Color(0x02617A)  // A slightly darker shade of red
-                }
                 // Add more color palettes here
         };
 
@@ -116,7 +68,7 @@ public class Maze extends JPanel implements Runnable {
         return colorPalettes[randomPaletteIndex];
     }
 
-
+    // Generate a contrasting color for maze elements
     Color generateContrastingColor(Color background) {
         Random random = new Random();
         int red = random.nextInt(256);
@@ -125,7 +77,7 @@ public class Maze extends JPanel implements Runnable {
 
         Color foreground = new Color(red, green, blue);
 
-        // Ensure sufficient contrast
+        // Ensure sufficient contrast between background and foreground colors
         if (getContrastRatio(background, foreground) < 4.5) {
             return generateContrastingColor(background);
         }
@@ -133,21 +85,22 @@ public class Maze extends JPanel implements Runnable {
         return foreground;
     }
 
+    // Calculate the contrast ratio between two colors
     double getContrastRatio(Color color1, Color color2) {
-        // Calculate contrast ratio (as per W3C standards)
         int l1 = getLuminance(color1);
         int l2 = getLuminance(color2);
         return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
     }
 
+    // Calculate the luminance of a color
     int getLuminance(Color color) {
-        // Calculate relative luminance (as per W3C standards)
         int red = color.getRed();
         int green = color.getGreen();
         int blue = color.getBlue();
         return (int) (0.299 * red + 0.587 * green + 0.114 * blue);
     }
 
+    // Check if the size of the maze panel has changed
     void checkSize() {
         if (getWidth() != width || getHeight() != height) {
             width = getWidth();
@@ -161,12 +114,14 @@ public class Maze extends JPanel implements Runnable {
         }
     }
 
+    // Override the paintComponent method to redraw the maze
     synchronized protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         checkSize();
         redrawMaze(g);
     }
 
+    // Redraw the maze with appropriate colors
     void redrawMaze(Graphics g) {
         if (mazeExists) {
             int w = totalWidth / columns;
@@ -174,7 +129,7 @@ public class Maze extends JPanel implements Runnable {
             for (int j = 0; j < columns; j++) {
                 for (int i = 0; i < rows; i++) {
                     if (maze[i][j] < 0) {
-                        g.setColor(colors[emptyCode]);
+                        g.setColor(colors[EMPTY]);
                     } else {
                         g.setColor(colors[maze[i][j]]);
                     }
@@ -184,7 +139,7 @@ public class Maze extends JPanel implements Runnable {
         }
     }
 
-
+    // Runnable method to control maze generation and solving
     public void run() {
         try {
             Thread.sleep(1000);
@@ -208,6 +163,7 @@ public class Maze extends JPanel implements Runnable {
         }
     }
 
+    // Generate the maze grid
     void makeMaze() {
         if (maze == null)
             maze = new int[rows][columns];
@@ -218,7 +174,7 @@ public class Maze extends JPanel implements Runnable {
         int[] wallcol = new int[(rows * columns) / 2];
         for (i = 0; i < rows; i++)
             for (j = 0; j < columns; j++)
-                maze[i][j] = wallCode;
+                maze[i][j] = WALL;
         for (i = 1; i < rows - 1; i += 2)
             for (j = 1; j < columns - 1; j += 2) {
                 emptyCt++;
@@ -246,9 +202,10 @@ public class Maze extends JPanel implements Runnable {
         for (i = 1; i < rows - 1; i++)
             for (j = 1; j < columns - 1; j++)
                 if (maze[i][j] < 0)
-                    maze[i][j] = emptyCode;
+                    maze[i][j] = EMPTY;
     }
 
+    // Tear down walls to create paths in the maze
     synchronized void tearDown(int row, int col) {
         if (row % 2 == 1 && maze[row][col - 1] != maze[row][col + 1]) {
             fill(row, col - 1, maze[row][col - 1], maze[row][col + 1]);
@@ -269,6 +226,7 @@ public class Maze extends JPanel implements Runnable {
         }
     }
 
+    // Fill the maze with a specified value
     void fill(int row, int col, int replace, int replaceWith) {
         if (maze[row][col] == replace) {
             maze[row][col] = replaceWith;
@@ -279,9 +237,10 @@ public class Maze extends JPanel implements Runnable {
         }
     }
 
+    // Solve the maze using a recursive algorithm
     boolean solveMaze(int row, int col) {
-        if (maze[row][col] == emptyCode) {
-            maze[row][col] = pathCode;
+        if (maze[row][col] == EMPTY) {
+            maze[row][col] = PATH;
             repaint();
             try {
                 Thread.sleep(speedSleep);
@@ -292,7 +251,7 @@ public class Maze extends JPanel implements Runnable {
             if (solveMaze(row - 1, col) || solveMaze(row, col - 1) || solveMaze(row + 1, col) || solveMaze(row, col + 1)) {
                 return true;
             }
-            maze[row][col] = visitedCode;
+            maze[row][col] = VISITED;
             repaint();
             try {
                 Thread.sleep(speedSleep);
