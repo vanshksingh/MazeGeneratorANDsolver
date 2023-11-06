@@ -19,7 +19,7 @@ public class RandomMazeGenerator extends JPanel implements Runnable {
     final static int pathCode = 2;
     final static int emptyCode = 3;
     final static int visitedCode = 4;
-    Color[] colors;
+    Color color;
     int rows = 41;
     int columns = 51;
     int border = 0;
@@ -35,15 +35,9 @@ public class RandomMazeGenerator extends JPanel implements Runnable {
     boolean mazeExists = false;
 
     public RandomMazeGenerator() {
-        colors = new Color[] {
-            new Color(200, 0, 0),
-            new Color(200, 0, 0),
-            new Color(128, 128, 255),
-            Color.WHITE,
-            new Color(200, 200, 200)
-        };
-        setBackground(colors[backgroundCode]);
-        setPreferredSize(new Dimension(blockSize * columns, blockSize * rows));
+        color = getRandomColor();
+        setBackground(color);
+        setPreferredSize(new Dimension(blockSize * columns, blockSize * rows);
         new Thread(this).start();
     }
 
@@ -73,9 +67,9 @@ public class RandomMazeGenerator extends JPanel implements Runnable {
             for (int j = 0; j < columns; j++) {
                 for (int i = 0; i < rows; i++) {
                     if (maze[i][j] < 0) {
-                        g.setColor(colors[emptyCode]);
+                        g.setColor(color);
                     } else {
-                        g.setColor(getRandomColor());
+                        g.setColor(Color.BLACK); // You can change this to set the maze paths to a different color
                     }
                     g.fillRect((j * w) + left, (i * h) + top, w, h);
                 }
@@ -192,14 +186,4 @@ public class RandomMazeGenerator extends JPanel implements Runnable {
             }
             if (solveMaze(row - 1, col) || solveMaze(row, col - 1) || solveMaze(row + 1, col) || solveMaze(row, col + 1)) {
                 return true;
-            }
-            maze[row][col] = visitedCode;
-            repaint();
-            try {
-                Thread.sleep(speedSleep);
-            } catch (InterruptedException e) {
-            }
-        }
-        return false;
-    }
-}
+           
