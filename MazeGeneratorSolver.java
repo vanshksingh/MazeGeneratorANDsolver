@@ -15,61 +15,48 @@ public class MazeGeneratorSolver {
     }
 
     public void generateMaze() {
-        // Initialize the maze with walls
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 maze[i][j] = WALL;
             }
         }
 
-        Random random = new Random();
-        int startX = random.nextInt(cols);
-        int startY = random.nextInt(rows);
+        divide(1, 1, rows - 2, cols - 2);
+    }
 
-        int currentX = startX;
-        int currentY = startY;
-
-        int visitedCells = 1;
-        int totalCells = rows * cols;
-
-        while (visitedCells < totalCells) {
-            List<Integer> directions = Arrays.asList(1, 2, 3, 4);
-            Collections.shuffle(directions);
-
-            for (int direction : directions) {
-                int nextX = currentX;
-                int nextY = currentY;
-
-                switch (direction) {
-                    case 1: // Up
-                        nextY = currentY - 1;
-                        break;
-                    case 2: // Down
-                        nextY = currentY + 1;
-                        break;
-                    case 3: // Left
-                        nextX = currentX - 1;
-                        break;
-                    case 4: // Right
-                        nextX = currentX + 1;
-                        break;
-                }
-
-                if (nextX > 0 && nextX < cols - 1 && nextY > 0 && nextY < rows - 1 && maze[nextY][nextX] == WALL) {
-                    maze[nextY][nextX] = PATH;
-                    maze[currentY][currentX] = PATH;
-                    visitedCells++;
-                }
-
-                currentX = nextX;
-                currentY = nextY;
-            }
+    private void divide(int startX, int startY, int width, int height) {
+        if (width < 2 || height < 2) {
+            return;
         }
+
+        int wallX = startX + randomEven(width);
+        int wallY = startY + randomEven(height);
+
+        for (int i = startX; i < startX + width; i++) {
+            maze[wallY][i] = PATH;
+        }
+        for (int i = startY; i < startY + height; i++) {
+            maze[i][wallX] = PATH;
+        }
+
+        int passageX = startX + randomEven(width - 1);
+        int passageY = startY + randomEven(height - 1);
+
+        maze[passageY][passageX] = PATH;
+
+        divide(startX, startY, wallX - startX, wallY - startY);
+        divide(wallX + 1, startY, startX + width - wallX - 1, wallY - startY);
+        divide(startX, wallY + 1, wallX - startX, startY + height - wallY - 1);
+        divide(wallX + 1, wallY + 1, startX + width - wallX - 1, startY + height - wallY - 1);
+    }
+
+    private int randomEven(int max) {
+        return 2 * (int) (Math.random() * (max / 2 + 1));
     }
 
     public void solveMaze() {
         // Implement your maze-solving algorithm here
-        // You can use the depth-first search or other search algorithms
+        // You can use depth-first search or other search algorithms
     }
 
     public void printMaze() {
