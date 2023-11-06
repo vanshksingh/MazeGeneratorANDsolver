@@ -1,6 +1,5 @@
 import java.awt.*;
 import javax.swing.*;
-import java.util.Random;
 
 public class Maze extends JPanel implements Runnable {
 
@@ -19,7 +18,6 @@ public class Maze extends JPanel implements Runnable {
     final static int pathCode = 2;
     final static int emptyCode = 3;
     final static int visitedCode = 4;
-
     Color[] color;
     int rows = 41;
     int columns = 51;
@@ -27,7 +25,6 @@ public class Maze extends JPanel implements Runnable {
     int sleepTime = 5000;
     int speedSleep = 30;
     int blockSize = 12;
-
     int width = -1;
     int height = -1;
     int totalWidth;
@@ -37,7 +34,7 @@ public class Maze extends JPanel implements Runnable {
     boolean mazeExists = false;
 
     public Maze() {
-        color = new Color[]{
+        color = new Color[] {
                 new Color(200, 0, 0),
                 new Color(200, 0, 0),
                 new Color(128, 128, 255),
@@ -90,19 +87,18 @@ public class Maze extends JPanel implements Runnable {
         }
         while (true) {
             makeMaze();
-            solveMaze(1, 1);
-            synchronized (this) {
-                try {
-                    wait(sleepTime);
-                } catch (InterruptedException e) {
+            boolean solved = solveMaze(1, 1);
+            if (solved) {
+                synchronized (this) {
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException e) {
+                    }
                 }
             }
             mazeExists = false;
             repaint();
         }
-    }
-
-    private void solveMaze(int i, int i1) {
     }
 
     void makeMaze() {
@@ -152,7 +148,7 @@ public class Maze extends JPanel implements Runnable {
             maze[row][col] = maze[row][col + 1];
             repaint();
             try {
-                wait(speedSleep);
+                Thread.sleep(speedSleep);
             } catch (InterruptedException e) {
             }
         } else if (row % 2 == 0 && maze[row - 1][col] != maze[row + 1][col]) {
@@ -160,7 +156,7 @@ public class Maze extends JPanel implements Runnable {
             maze[row][col] = maze[row + 1][col];
             repaint();
             try {
-                wait(speedSleep);
+                Thread.sleep(speedSleep);
             } catch (InterruptedException e) {
             }
         }
@@ -174,6 +170,28 @@ public class Maze extends JPanel implements Runnable {
             fill(row, col + 1, replace, replaceWith);
             fill(row, col - 1, replace, replaceWith);
         }
-    }}
+    }
 
-
+    boolean solveMaze(int row, int col) {
+        if (maze[row][col] == emptyCode) {
+            maze[row][col] = pathCode;
+            repaint();
+            if (row == rows - 2 && col == columns - 2)
+                return true;
+            try {
+                Thread.sleep(speedSleep);
+            } catch (InterruptedException e) {
+            }
+            if (solveMaze(row - 1, col) || solveMaze(row, col - 1) || solveMaze(row + 1, col) || solveMaze(row, col + 1)) {
+                return true;
+            }
+            maze[row][col] = visitedCode;
+            repaint();
+            try {
+                Thread.sleep(speedSleep);
+            } catch (InterruptedException e) {
+            }
+        }
+        return false;
+    }
+}
