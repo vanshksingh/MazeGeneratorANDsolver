@@ -15,44 +15,61 @@ public class MazeGeneratorSolver {
     }
 
     public void generateMaze() {
+        // Initialize the maze with walls
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 maze[i][j] = WALL;
             }
         }
 
-        recursiveDivision(1, 1, cols - 2, rows - 2);
-    }
+        Random random = new Random();
+        int startX = random.nextInt(cols);
+        int startY = random.nextInt(rows);
 
-    private void recursiveDivision(int x, int y, int width, int height) {
-        if (width < 2 || height < 2) {
-            return;
+        int currentX = startX;
+        int currentY = startY;
+
+        int visitedCells = 1;
+        int totalCells = rows * cols;
+
+        while (visitedCells < totalCells) {
+            List<Integer> directions = Arrays.asList(1, 2, 3, 4);
+            Collections.shuffle(directions);
+
+            for (int direction : directions) {
+                int nextX = currentX;
+                int nextY = currentY;
+
+                switch (direction) {
+                    case 1: // Up
+                        nextY = currentY - 1;
+                        break;
+                    case 2: // Down
+                        nextY = currentY + 1;
+                        break;
+                    case 3: // Left
+                        nextX = currentX - 1;
+                        break;
+                    case 4: // Right
+                        nextX = currentX + 1;
+                        break;
+                }
+
+                if (nextX > 0 && nextX < cols - 1 && nextY > 0 && nextY < rows - 1 && maze[nextY][nextX] == WALL) {
+                    maze[nextY][nextX] = PATH;
+                    maze[currentY][currentX] = PATH;
+                    visitedCells++;
+                }
+
+                currentX = nextX;
+                currentY = nextY;
+            }
         }
-
-        int wallX = x + 2 + (int) (Math.random() * (width - 2) / 2) * 2;
-        int wallY = y + 2 + (int) (Math.random() * (height - 2) / 2) * 2;
-
-        for (int i = y; i <= y + height; i++) {
-            maze[i][wallX] = WALL;
-        }
-
-        for (int j = x; j <= x + width; j++) {
-            maze[wallY][j] = WALL;
-        }
-
-        int gapX = x + 2 + (int) (Math.random() * (width - 2) / 2) * 2;
-        int gapY = y + 2 + (int) (Math.random() * (height - 2) / 2) * 2;
-
-        maze[gapY][gapX] = PATH;
-
-        recursiveDivision(x, y, wallX - x - 1, wallY - y - 1);
-        recursiveDivision(wallX + 1, y, x + width - wallX - 1, wallY - y - 1);
-        recursiveDivision(x, wallY + 1, wallX - x - 1, y + height - wallY - 1);
-        recursiveDivision(wallX + 1, wallY + 1, x + width - wallX - 1, y + height - wallY - 1);
     }
 
     public void solveMaze() {
-        
+        // Implement your maze-solving algorithm here
+        // You can use the depth-first search or other search algorithms
     }
 
     public void printMaze() {
