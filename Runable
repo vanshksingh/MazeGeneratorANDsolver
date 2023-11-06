@@ -36,24 +36,114 @@ public class Maze extends JPanel implements Runnable {
     boolean solving = false;
 
     public Maze() {
-        colors = generateRandomColors();
+        colors = generateMazeColors();
         setBackground(colors[backgroundCode]);
         setPreferredSize(new Dimension(blockSize * columns, blockSize * rows));
         new Thread(this).start();
     }
 
-    // Helper method to generate random colors
-    Color[] generateRandomColors() {
-        Color[] generatedColors = new Color[5];
+    // Helper method to generate luxurious colors with correct contrast
+    // Helper method to generate luxurious colors with contrast
+    Color[] generateMazeColors() {
+        Color[][] colorPalettes = new Color[][] {
+                {
+                        // Background Color (Dark)
+                        new Color(0x222222),
+                        // Wall Color (Light)
+                        new Color(0xFFFFFF),
+                        // Empty Space Color (Dark)
+                        new Color(0x222222),
+                        // Path Color (Inverse of Wall)
+                        new Color(0xF3A963),  // Inverse of white (black)
+                        // Visited Path Color (Darker version of Path)
+                        new Color(0xDC6606)  // A slightly darker shade of black
+                },
+                {
+                        // Background Color (Dark Gray)
+                        new Color(0x444444),
+                        // Wall Color (Light Gray)
+                        new Color(0xDDDDDD),
+                        // Empty Space Color (Dark Gray)
+                        new Color(0x444444),
+                        // Path Color (Inverse of Wall)
+                        new Color(0x06A6A6),  // A darker shade of gray
+                        // Visited Path Color (Darker version of Path)
+                        new Color(0x056565)  // A slightly darker shade of gray
+                },
+                {
+                        // Background Color (Navy Blue)
+                        new Color(0x000080),
+                        // Wall Color (Light Blue)
+                        new Color(0x87CEEB),
+                        // Empty Space Color (Navy Blue)
+                        new Color(0x000080),
+                        // Path Color (Inverse of Wall)
+                        new Color(0x53EA8C),  // A darker shade of blue
+                        // Visited Path Color (Darker version of Path)
+                        new Color(0x308650)  // A slightly darker shade of blue
+                },
+                {
+                        // Background Color (Dark Green)
+                        new Color(0x28324A),
+                        // Wall Color (Light Green)
+                        new Color(0xF0D543),
+                        // Empty Space Color (Dark Green)
+                        new Color(0x28324A),
+                        // Path Color (Inverse of Wall)
+                        new Color(0xEC4F57),  // A darker shade of green
+                        // Visited Path Color (Darker version of Path)
+                        new Color(0x8C3033)  // A slightly darker shade of green
+                },
+                {
+                        // Background Color (Dark Red)
+                        new Color(0xF33D9F),
+                        // Wall Color (Light Red)
+                        new Color(0xACE964),
+                        // Empty Space Color (Dark Red)
+                        new Color(0xF33D9F),
+                        // Path Color (Inverse of Wall)
+                        new Color(0x039DC6),  // A darker shade of red
+                        // Visited Path Color (Darker version of Path)
+                        new Color(0x02617A)  // A slightly darker shade of red
+                }
+                // Add more color palettes here
+        };
+
         Random random = new Random();
+        int randomPaletteIndex = random.nextInt(colorPalettes.length);
+        return colorPalettes[randomPaletteIndex];
+    }
 
-        generatedColors[backgroundCode] = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
-        generatedColors[wallCode] = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
-        generatedColors[pathCode] = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
-        generatedColors[emptyCode] = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
-        generatedColors[visitedCode] = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
 
-        return generatedColors;
+    Color generateContrastingColor(Color background) {
+        Random random = new Random();
+        int red = random.nextInt(256);
+        int green = random.nextInt(256);
+        int blue = random.nextInt(256);
+
+        Color foreground = new Color(red, green, blue);
+
+        // Ensure sufficient contrast
+        if (getContrastRatio(background, foreground) < 4.5) {
+            return generateContrastingColor(background);
+        }
+
+        return foreground;
+    }
+
+    double getContrastRatio(Color color1, Color color2) {
+        // Calculate contrast ratio (as per W3C standards)
+        int l1 = getLuminance(color1);
+        int l2 = getLuminance(color2);
+        return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    }
+
+    int getLuminance(Color color) {
+        // Calculate relative luminance (as per W3C standards)
+        int red = color.getRed();
+        int green = color.getGreen();
+        int blue = color.getBlue();
+        return (int) (0.299 * red + 0.587 * green + 0.114 * blue);
     }
 
     void checkSize() {
