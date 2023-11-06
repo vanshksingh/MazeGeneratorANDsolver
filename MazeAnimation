@@ -7,7 +7,7 @@ import java.util.TimerTask;
 public class MazeAnimation extends JPanel {
     private int[][] maze;
     private int rows;
-    private cols;
+    private int cols;
 
     private ArrayList<Point> visitedCells;
     private Stack<Point> stack;
@@ -38,9 +38,6 @@ public class MazeAnimation extends JPanel {
         solvingTimer = new Timer();
 
         generationTimer.schedule(new MazeGenerationTask(), 0, 50); // Adjust the delay for animation speed
-
-        generationComplete = false;
-        solvingComplete = false;
     }
 
     public void generateMaze() {
