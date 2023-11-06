@@ -1,5 +1,7 @@
 # MazeGeneratorANDsolver
 
+<img width="1680" alt="Screenshot 2023-11-07 at 5 27 15 AM" src="https://github.com/vanshksingh/MazeGeneratorANDsolver/assets/114809624/915904f7-3728-48a9-ad88-63be9ab7b713">
+
 
 # Maze Solver
 
