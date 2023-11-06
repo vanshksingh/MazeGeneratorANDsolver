@@ -29,7 +29,7 @@ To run the Maze Solver locally, Java must be installed on your system. Follow th
 
 2. Open your terminal or command prompt and navigate to the project directory.
 
-3. Compile and run the Maze.java file:
+3. Compile and run the Maze.java (TITLED: RUNNABLE , rest are test code files) file:
 
    ```bash
    javac Maze.java
