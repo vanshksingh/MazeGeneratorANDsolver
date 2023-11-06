@@ -116,11 +116,37 @@ public class MazeGeneratorSolver {
     }
 
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
         MazeGeneratorSolver mazeGenerator = new MazeGeneratorSolver(21, 21);
-        mazeGenerator.generateMaze();
-        mazeGenerator.printMaze();
-        mazeGenerator.solveMaze();
-        mazeGenerator.printMaze();
+
+        while (true) {
+            System.out.println("Menu:");
+            System.out.println("1. Generate Maze");
+            System.out.println("2. Solve Maze");
+            System.out.println("3. Exit");
+
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    mazeGenerator.generateMaze();
+                    mazeGenerator.printMaze();
+                    break;
+                case 2:
+                    mazeGenerator.solveMaze();
+                    mazeGenerator.printMaze();
+                    break;
+                case 3:
+                    System.out.println("Exiting program.");
+                    scanner.close();
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please select a valid option.");
+                    break;
+            }
+        }
     }
 }
 
