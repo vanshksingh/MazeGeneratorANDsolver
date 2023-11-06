@@ -1,5 +1,6 @@
 import java.awt.*;
 import javax.swing.*;
+import java.util.Random;
 
 public class Maze extends JPanel implements Runnable {
 
@@ -18,7 +19,7 @@ public class Maze extends JPanel implements Runnable {
     final static int pathCode = 2;
     final static int emptyCode = 3;
     final static int visitedCode = 4;
-    Color[] color;
+    Color[] colors;
     int rows = 41;
     int columns = 51;
     int border = 0;
@@ -32,18 +33,27 @@ public class Maze extends JPanel implements Runnable {
     int left;
     int top;
     boolean mazeExists = false;
+    boolean solving = false;
 
     public Maze() {
-        color = new Color[] {
-                new Color(200, 0, 0),
-                new Color(200, 0, 0),
-                new Color(128, 128, 255),
-                Color.WHITE,
-                new Color(200, 200, 200)
-        };
-        setBackground(color[backgroundCode]);
+        colors = generateRandomColors();
+        setBackground(colors[backgroundCode]);
         setPreferredSize(new Dimension(blockSize * columns, blockSize * rows));
         new Thread(this).start();
+    }
+
+    // Helper method to generate random colors
+    Color[] generateRandomColors() {
+        Color[] generatedColors = new Color[5];
+        Random random = new Random();
+
+        generatedColors[backgroundCode] = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
+        generatedColors[wallCode] = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
+        generatedColors[pathCode] = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
+        generatedColors[emptyCode] = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
+        generatedColors[visitedCode] = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
+
+        return generatedColors;
     }
 
     void checkSize() {
@@ -69,16 +79,19 @@ public class Maze extends JPanel implements Runnable {
         if (mazeExists) {
             int w = totalWidth / columns;
             int h = totalHeight / rows;
-            for (int j = 0; j < columns; j++)
+            for (int j = 0; j < columns; j++) {
                 for (int i = 0; i < rows; i++) {
-                    if (maze[i][j] < 0)
-                        g.setColor(color[emptyCode]);
-                    else
-                        g.setColor(color[maze[i][j]]);
+                    if (maze[i][j] < 0) {
+                        g.setColor(colors[emptyCode]);
+                    } else {
+                        g.setColor(colors[maze[i][j]]);
+                    }
                     g.fillRect((j * w) + left, (i * h) + top, w, h);
                 }
+            }
         }
     }
+
 
     public void run() {
         try {
@@ -87,7 +100,9 @@ public class Maze extends JPanel implements Runnable {
         }
         while (true) {
             makeMaze();
+            solving = true;
             boolean solved = solveMaze(1, 1);
+            solving = false;
             if (solved) {
                 synchronized (this) {
                     try {
@@ -176,12 +191,12 @@ public class Maze extends JPanel implements Runnable {
         if (maze[row][col] == emptyCode) {
             maze[row][col] = pathCode;
             repaint();
-            if (row == rows - 2 && col == columns - 2)
-                return true;
             try {
                 Thread.sleep(speedSleep);
             } catch (InterruptedException e) {
             }
+            if (row == rows - 2 && col == columns - 2)
+                return true;
             if (solveMaze(row - 1, col) || solveMaze(row, col - 1) || solveMaze(row + 1, col) || solveMaze(row, col + 1)) {
                 return true;
             }
