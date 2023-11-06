@@ -1,0 +1,149 @@
+import javax.swing.*;
+import java.awt.*;
+import java.util.*;
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class MazeAnimation extends JPanel {
+    private int[][] maze;
+    private int rows;
+    private int cols;
+
+    private ArrayList<Point> visitedCells;
+    private Stack<Point> stack;
+
+    private int currentX, currentY;
+
+    private Timer generationTimer;
+    private Timer solvingTimer;
+    private boolean generationComplete;
+    private boolean solvingComplete;
+
+    public MazeAnimation(int rows, int cols) {
+        this.rows = rows;
+        this.cols = cols;
+        this.maze = new int[rows][cols];
+
+        visitedCells = new ArrayList<>();
+        stack = new Stack<>();
+        currentX = 1; // Start from cell (1, 1)
+        currentY = 1;
+
+        generationTimer = new Timer();
+        solvingTimer = new Timer();
+
+        generationComplete = false;
+        solvingComplete = false;
+
+        setPreferredSize(new Dimension(800, 800));
+
+        generationTimer.schedule(new MazeGenerationTask(), 0, 10); // Adjust the delay for animation speed
+    }
+
+    public void generateMaze() {
+        if (!generationComplete) {
+            int[][] directions = {{0, 2}, {0, -2}, {2, 0}, {-2, 0}};
+            Collections.shuffle(Arrays.asList(directions));
+
+            visitedCells.add(new Point(currentX, currentY));
+            int directionCount = 0;
+
+            for (int[] dir : directions) {
+                int newX = currentX + dir[0];
+                int newY = currentY + dir[1];
+
+                if (newX > 0 && newX < cols && newY > 0 && newY < rows && !visitedCells.contains(new Point(newX, newY))) {
+                    int wallX = (currentX + newX) / 2;
+                    int wallY = (currentY + newY) / 2;
+
+                    maze[wallY][wallX] = 0;
+                    currentX = newX;
+                    currentY = newY;
+                    stack.push(new Point(currentX, currentY));
+                    directionCount++;
+                }
+            }
+
+            if (directionCount == 0) {
+                if (!stack.isEmpty()) {
+                    Point popped = stack.pop();
+                    currentX = (int) popped.getX();
+                    currentY = (int) popped.getY();
+                } else {
+                    generationComplete = true;
+                }
+            }
+        }
+    }
+
+    public void solveMaze() {
+        // Implement your maze-solving logic here
+        // Update the 'maze' array as you solve the maze
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        int cellSize = 20;
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (maze[i][j] == 1) {
+                    g.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+
+        if (solvingComplete) {
+            // Implement rendering of the solving path
+        }
+    }
+
+    private class MazeGenerationTask extends TimerTask {
+        @Override
+        public void run() {
+            if (!generationComplete) {
+                generateMaze();
+                repaint();
+            } else {
+                solvingComplete = false;
+                solvingTimer.schedule(new MazeSolvingTask(), 1000, 10); // Start solving after a delay
+                generationTimer.cancel();
+            }
+        }
+    }
+
+    private class MazeSolvingTask extends TimerTask {
+        @Override
+        public void run() {
+            if (!solvingComplete) {
+                solveMaze();
+                repaint();
+            } else {
+                solvingTimer.cancel();
+            }
+        }
+    }
+
+    private boolean generationComplete() {
+        return generationComplete;
+    }
+
+    private boolean solvingComplete() {
+        return solvingComplete;
+    }
+
+    public static void main(String[] args) {
+        int mazeRows = 41;
+        int mazeCols = 41;
+
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Maze Generation and Solving Animation");
+            MazeAnimation mazeAnimation = new MazeAnimation(mazeRows, mazeCols);
+            frame.add(mazeAnimation);
+            frame.pack();
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setVisible(true);
+        });
+    }
+}
