@@ -9,9 +9,7 @@ public class MazeAnimation extends JPanel {
     private int rows;
     private int cols;
 
-    private ArrayList<Point> visitedCells;
-    private Stack<Point> stack;
-
+    private int cellSize = 20;
     private int currentX, currentY;
 
     private Timer generationTimer;
@@ -19,20 +17,23 @@ public class MazeAnimation extends JPanel {
     private boolean generationComplete;
     private boolean solvingComplete;
 
+    private ArrayList<Point> visitedCells;
+    private ArrayList<Point> path;
+
+    private Random random;
+
     public MazeAnimation(int rows, int cols) {
         this.rows = rows;
         this.cols = cols;
         this.maze = new int[rows][cols];
 
-        visitedCells = new ArrayList<>();
-        stack = new Stack<>();
-        currentX = 1; // Start from cell (1, 1)
-        currentY = 1;
-
         generationComplete = false;
         solvingComplete = false;
+        visitedCells = new ArrayList<>();
+        path = new ArrayList<>();
+        random = new Random();
 
-        setPreferredSize(new Dimension(800, 800));
+        setPreferredSize(new Dimension(cols * cellSize, rows * cellSize));
 
         generationTimer = new Timer();
         solvingTimer = new Timer();
@@ -42,49 +43,95 @@ public class MazeAnimation extends JPanel {
 
     public void generateMaze() {
         if (!generationComplete) {
-            int[][] directions = {{0, 2}, {0, -2}, {2, 0}, {-2, 0}};
-            Collections.shuffle(Arrays.asList(directions));
-
-            visitedCells.add(new Point(currentX, currentY));
-            int directionCount = 0;
-
-            for (int[] dir : directions) {
-                int newX = currentX + dir[0];
-                int newY = currentY + dir[1];
-
-                if (newX > 0 && newX < cols && newY > 0 && newY < rows && !visitedCells.contains(new Point(newX, newY))) {
-                    int wallX = (currentX + newX) / 2;
-                    int wallY = (currentY + newY) / 2;
-
-                    maze[wallY][wallX] = 0;
-                    currentX = newX;
-                    currentY = newY;
-                    stack.push(new Point(currentX, currentY));
-                    directionCount++;
-                }
-            }
-
-            if (directionCount == 0) {
-                if (!stack.isEmpty()) {
-                    Point popped = stack.pop();
-                    currentX = (int) popped.getX();
-                    currentY = (int) popped.getY();
+            // Implement Wilson's algorithm for maze generation
+            if (visitedCells.isEmpty()) {
+                // Start a random walk from a random cell
+                int startX = random.nextInt(cols);
+                int startY = random.nextInt(rows);
+                visitedCells.add(new Point(startX, startY));
+                currentX = startX;
+                currentY = startY;
+                maze[currentY][currentX] = 1; // Mark the cell as visited
+            } else {
+                // Continue the random walk
+                ArrayList<Point> unvisitedNeighbors = getUnvisitedNeighbors(currentX, currentY);
+                if (!unvisitedNeighbors.isEmpty()) {
+                    // Choose a random unvisited neighbor
+                    Point neighbor = unvisitedNeighbors.get(random.nextInt(unvisitedNeighbors.size()));
+                    // Remove the wall between the current cell and the chosen neighbor
+                    maze[neighbor.y][neighbor.x] = 1;
+                    // Mark the chosen neighbor as visited
+                    visitedCells.add(neighbor);
+                    currentX = neighbor.x;
+                    currentY = neighbor.y;
                 } else {
-                    generationComplete = true;
+                    // Random walk finished, remove the path from the visited cells
+                    visitedCells.remove(visitedCells.size() - 1);
                 }
             }
+
+            if (visitedCells.isEmpty()) {
+                generationComplete = true; // Maze generation is complete
+            }
+        } else {
+            generationTimer.cancel();
+            solvingComplete = false;
+            solvingTimer.schedule(new MazeSolvingTask(), 1000, 50); // Start solving after a delay
         }
     }
 
     public void solveMaze() {
-        // Implement your maze-solving logic here
-        // Update the 'maze' array as you solve the maze
+        if (!solvingComplete) {
+            // Implement Depth-First Search for maze solving
+            // You can start solving from any point and mark the path as you find it
+            // For a simple example, let's mark a path from the top-left corner to the bottom-right corner
+            int endX = cols - 1;
+            int endY = rows - 1;
+            path = depthFirstSearch(currentX, currentY, endX, endY);
+            solvingComplete = true;
+        } else {
+            solvingTimer.cancel();
+        }
+    }
+
+    private ArrayList<Point> depthFirstSearch(int startX, int startY, int endX, int endY) {
+        // Implement Depth-First Search here
+        // Return a list of points representing the path
+        // This is a simplified example, you can expand this method
+        ArrayList<Point> result = new ArrayList<>();
+        int x = startX;
+        int y = startY;
+        while (x != endX || y != endY) {
+            if (x < endX) {
+                x++;
+            } else if (x > endX) {
+                x--;
+            } else if (y < endY) {
+                y++;
+            } else if (y > endY) {
+                y--;
+            }
+            result.add(new Point(x, y));
+        }
+        return result;
+    }
+
+    private ArrayList<Point> getUnvisitedNeighbors(int x, int y) {
+        ArrayList<Point> neighbors = new ArrayList<>();
+        int[][] moves = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        for (int[] move : moves) {
+            int newX = x + move[0];
+            int newY = y + move[1];
+            if (newX >= 0 && newX < cols && newY >= 0 && newY < rows && maze[newY][newX] == 0) {
+                neighbors.add(new Point(newX, newY));
+            }
+        }
+        return neighbors;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        int cellSize = 20;
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -94,34 +141,25 @@ public class MazeAnimation extends JPanel {
             }
         }
 
-        if (solvingComplete) {
-            // Implement rendering of the solving path
+        g.setColor(Color.BLUE);
+        for (Point point : path) {
+            g.fillRect(point.x * cellSize, point.y * cellSize, cellSize, cellSize);
         }
     }
 
     private class MazeGenerationTask extends TimerTask {
         @Override
         public void run() {
-            if (!generationComplete) {
-                generateMaze();
-                SwingUtilities.invokeLater(() -> repaint());
-            } else {
-                solvingComplete = false;
-                solvingTimer.schedule(new MazeSolvingTask(), 1000, 50); // Start solving after a delay
-                generationTimer.cancel();
-            }
+            generateMaze();
+            repaint();
         }
     }
 
     private class MazeSolvingTask extends TimerTask {
         @Override
         public void run() {
-            if (!solvingComplete) {
-                solveMaze();
-                SwingUtilities.invokeLater(() -> repaint());
-            } else {
-                solvingTimer.cancel();
-            }
+            solveMaze();
+            repaint();
         }
     }
 
